@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Analytics Dashboard</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 0;
+            background: #f4f6f9;
+        }
+
+        header {
+            background: #1976d2;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 22px;
+        }
+
+        .controls {
+            padding: 15px;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin-right: 10px;
+            border: none;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #0d47a1;
+        }
+
+        input {
+            padding: 8px;
+            width: 200px;
+        }
+
+        .cards {
+            display: flex;
+            gap: 20px;
+            padding: 15px;
+        }
+
+        .card {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px;
+            background: white;
+        }
+
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #1976d2;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    📊 Student Analytics Dashboard
+</header>
+
+<div class="controls">
+    <button onclick="loadData()">Load Data</button>
+    <button onclick="getStudents()">Students</button>
+    <button onclick="getScores()">Scores</button>
+    <input type="text" id="search" placeholder="Search..." onkeyup="filterTable()">
+</div>
+
+<div class="cards">
+    <div class="card">
+        <h2 id="total">0</h2>
+        <p>Total Records</p>
+    </div>
+    <div class="card">
+        <h2 id="avgMath">0</h2>
+        <p>Avg Math Score</p>
+    </div>
+    <div class="card">
+        <h2 id="avgReading">0</h2>
+        <p>Avg Reading Score</p>
+    </div>
+</div>
+
+<table id="table">
+    <thead id="thead"></thead>
+    <tbody id="tbody"></tbody>
+</table>
+
+<script>
+
+const BASE_URL = "http://127.0.0.1:8000";
+
+// 🔥 LOAD DATA
+async function loadData() {
+    try {
+        const res = await fetch(BASE_URL + "/load-data");
+        const data = await res.json();
+        alert(data.message);
+    } catch (err) {
+        alert("Error loading data");
+    }
+}
+
+// 🔥 GET STUDENTS
+async function getStudents() {
+    try {
+        const res = await fetch(BASE_URL + "/students");
+        const data = await res.json();
+
+        document.getElementById("total").innerText = data.length;
+        renderTable(data);
+
+    } catch (err) {
+        alert("Error fetching students");
+    }
+}
+
+// 🔥 GET SCORES
+async function getScores() {
+    try {
+        const res = await fetch(BASE_URL + "/scores");
+        const data = await res.json();
+
+        document.getElementById("avgMath").innerText = data.avg_math_score.toFixed(2);
+        document.getElementById("avgReading").innerText = data.avg_reading_score.toFixed(2);
+
+        renderTable(data.scores);
+
+    } catch (err) {
+        alert("Error fetching scores");
+    }
+}
+
+// 🔥 RENDER TABLE
+function renderTable(data) {
+    const thead = document.getElementById("thead");
+    const tbody = document.getElementById("tbody");
+
+    thead.innerHTML = "";
+    tbody.innerHTML = "";
+
+    if (data.length === 0) return;
+
+    // headers
+    let headers = Object.keys(data[0]);
+    let row = "<tr>";
+    headers.forEach(h => row += `<th>${h}</th>`);
+    row += "</tr>";
+    thead.innerHTML = row;
+
+    // rows
+    data.forEach(item => {
+        let row = "<tr>";
+        headers.forEach(h => row += `<td>${item[h]}</td>`);
+        row += "</tr>";
+        tbody.innerHTML += row;
+    });
+}
+
+// 🔥 SEARCH FILTER
+function filterTable() {
+    let input = document.getElementById("search").value.toLowerCase();
+    let rows = document.querySelectorAll("#tbody tr");
+
+    rows.forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
+    });
+}
+
+</script>
+
+</body>
+</html>

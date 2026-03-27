@@ -1,0 +1,18 @@
+api:
+  title: Student API
+
+data:
+  source: StudentsPerformance.csv
+
+endpoints:
+  - name: students
+    path: /students
+    type: full_data
+
+  - name: scores
+    path: /scores
+    type: selected_columns
+    columns:
+      - math score
+      - reading score
+      - writing score
